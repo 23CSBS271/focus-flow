@@ -17,7 +17,7 @@ export default function Home() {
   } = useSession();
   const router = useRouter();
   useEffect(() => {
-    // If not authenticated, redirect to login
+    // If not authenticated, redirect to login page
     if (status === 'unauthenticated' && !user && !isLoading) {
       router.push("/login");
     }

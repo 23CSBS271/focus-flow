@@ -19,25 +19,73 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  // Password validation states
+  const [passwordValidations, setPasswordValidations] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false
+  });
   const {
     register,
     isLoading
   } = useAuth();
   const router = useRouter();
+  // Password validation function
+  const validatePassword = (password) => {
+    const validations = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+    };
+    setPasswordValidations(validations);
+    return Object.values(validations).every(Boolean);
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    validatePassword(newPassword);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     setError("");
+
+    // Validate name (only letters and spaces)
+    if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+      setError("Name should only contain letters and spaces");
+      document.getElementById('name').focus();
+      return;
+    }
+
+    // Validate email (must be @gmail.com)
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      setError("Email must be a valid Gmail address (@gmail.com)");
+      document.getElementById('email').focus();
+      return;
+    }
+
+    // Validate password requirements
+    if (!Object.values(passwordValidations).every(Boolean)) {
+      setError("Password must meet all requirements");
+      document.getElementById('password').focus();
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords don't match");
+      document.getElementById('confirmPassword').focus();
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
+
     try {
       await register(name, email, password);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError("Registration failed. Please try again.");
     }
@@ -251,7 +299,7 @@ export default function RegisterPage() {
                   type: showPassword ? "text" : "password",
                   placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
                   value: password,
-                  onChange: e => setPassword(e.target.value),
+                  onChange: handlePasswordChange,
                   className: "pl-10 pr-10",
                   required: true
                 }), /*#__PURE__*/_jsx("button", {
@@ -264,6 +312,39 @@ export default function RegisterPage() {
                     className: "w-5 h-5"
                   })
                 })]
+              }), /*#__PURE__*/_jsx("div", {
+                className: "space-y-1 mt-2",
+                children: [{
+                  key: "length",
+                  label: "At least 8 characters",
+                  valid: passwordValidations.length
+                }, {
+                  key: "uppercase",
+                  label: "One uppercase letter",
+                  valid: passwordValidations.uppercase
+                }, {
+                  key: "lowercase",
+                  label: "One lowercase letter",
+                  valid: passwordValidations.lowercase
+                }, {
+                  key: "number",
+                  label: "One number",
+                  valid: passwordValidations.number
+                }, {
+                  key: "special",
+                  label: "One special character",
+                  valid: passwordValidations.special
+                }].map(({
+                  key,
+                  label,
+                  valid
+                }) => /*#__PURE__*/_jsxs("div", {
+                  className: `flex items-center gap-2 text-xs ${valid ? "text-green-600" : "text-muted-foreground"}`,
+                  children: [/*#__PURE__*/_jsx("div", {
+                    className: `w-3 h-3 rounded-full flex items-center justify-center text-xs ${valid ? "bg-green-500 text-white" : "border border-muted-foreground"}`,
+                    children: valid ? "✓" : ""
+                  }), label]
+                }, key))
               })]
             }), /*#__PURE__*/_jsxs("div", {
               className: "space-y-2",
@@ -311,7 +392,7 @@ export default function RegisterPage() {
             variant: "outline",
             className: "w-full",
             onClick: () => signIn('google', {
-              callbackUrl: '/'
+              callbackUrl: '/dashboard'
             }),
             children: [/*#__PURE__*/_jsxs("svg", {
               className: "w-5 h-5 mr-2",

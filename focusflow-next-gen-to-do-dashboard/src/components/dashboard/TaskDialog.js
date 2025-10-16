@@ -12,7 +12,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export function TaskDialog({
   open,
   onOpenChange,
@@ -25,6 +24,7 @@ export function TaskDialog({
   const [status, setStatus] = useState("todo");
   const [category, setCategory] = useState("personal");
   const [dueDate, setDueDate] = useState(undefined);
+  const [dueTime, setDueTime] = useState("12:00");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState([]);
   useEffect(() => {
@@ -35,6 +35,7 @@ export function TaskDialog({
       setStatus(task.status);
       setCategory(task.category);
       setDueDate(task.dueDate);
+      setDueTime(task.dueDate ? new Date(task.dueDate).toTimeString().slice(0, 5) : "12:00");
       setTags(task.tags || []);
     } else {
       // Reset form
@@ -44,17 +45,25 @@ export function TaskDialog({
       setStatus("todo");
       setCategory("personal");
       setDueDate(undefined);
+      setDueTime("12:00");
       setTags([]);
     }
   }, [task, open]);
   const handleSave = () => {
+    let combinedDueDate = undefined;
+    if (dueDate) {
+      const [hours, minutes] = dueTime.split(':').map(Number);
+      combinedDueDate = new Date(dueDate);
+      combinedDueDate.setHours(hours, minutes, 0, 0);
+    }
+
     const taskData = {
       title,
       description,
       priority,
       status,
       category,
-      dueDate,
+      dueDate: combinedDueDate,
       tags
     };
     if (task) {
@@ -72,195 +81,149 @@ export function TaskDialog({
   const handleRemoveTag = tag => {
     setTags(tags.filter(t => t !== tag));
   };
-  return /*#__PURE__*/_jsx(Dialog, {
-    open: open,
-    onOpenChange: onOpenChange,
-    children: /*#__PURE__*/_jsxs(DialogContent, {
-      className: "sm:max-w-[500px]",
-      children: [/*#__PURE__*/_jsxs(DialogHeader, {
-        children: [/*#__PURE__*/_jsx(DialogTitle, {
-          children: task ? "Edit Task" : "Create New Task"
-        }), /*#__PURE__*/_jsx(DialogDescription, {
-          children: task ? "Update task details" : "Add a new task to your workflow"
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "space-y-4 py-4",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "space-y-2",
-          children: [/*#__PURE__*/_jsx(Label, {
-            htmlFor: "title",
-            children: "Title *"
-          }), /*#__PURE__*/_jsx(Input, {
-            id: "title",
-            value: title,
-            onChange: e => setTitle(e.target.value),
-            placeholder: "Enter task title"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "space-y-2",
-          children: [/*#__PURE__*/_jsx(Label, {
-            htmlFor: "description",
-            children: "Description"
-          }), /*#__PURE__*/_jsx(Textarea, {
-            id: "description",
-            value: description,
-            onChange: e => setDescription(e.target.value),
-            placeholder: "Add task description",
-            rows: 3
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "space-y-2",
-          children: [/*#__PURE__*/_jsx(Label, {
-            htmlFor: "category",
-            children: "Category"
-          }), /*#__PURE__*/_jsxs(Select, {
-            value: category,
-            onValueChange: v => setCategory(v),
-            children: [/*#__PURE__*/_jsx(SelectTrigger, {
-              id: "category",
-              children: /*#__PURE__*/_jsx(SelectValue, {})
-            }), /*#__PURE__*/_jsxs(SelectContent, {
-              children: [/*#__PURE__*/_jsx(SelectItem, {
-                value: "personal",
-                children: "Personal"
-              }), /*#__PURE__*/_jsx(SelectItem, {
-                value: "work",
-                children: "Work"
-              }), /*#__PURE__*/_jsx(SelectItem, {
-                value: "health",
-                children: "Health"
-              }), /*#__PURE__*/_jsx(SelectItem, {
-                value: "shopping",
-                children: "Shopping"
-              }), /*#__PURE__*/_jsx(SelectItem, {
-                value: "other",
-                children: "Other"
-              })]
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "grid grid-cols-2 gap-4",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "space-y-2",
-            children: [/*#__PURE__*/_jsx(Label, {
-              htmlFor: "priority",
-              children: "Priority"
-            }), /*#__PURE__*/_jsxs(Select, {
-              value: priority,
-              onValueChange: v => setPriority(v),
-              children: [/*#__PURE__*/_jsx(SelectTrigger, {
-                id: "priority",
-                children: /*#__PURE__*/_jsx(SelectValue, {})
-              }), /*#__PURE__*/_jsxs(SelectContent, {
-                children: [/*#__PURE__*/_jsx(SelectItem, {
-                  value: "low",
-                  children: "Low"
-                }), /*#__PURE__*/_jsx(SelectItem, {
-                  value: "medium",
-                  children: "Medium"
-                }), /*#__PURE__*/_jsx(SelectItem, {
-                  value: "high",
-                  children: "High"
-                }), /*#__PURE__*/_jsx(SelectItem, {
-                  value: "urgent",
-                  children: "Urgent"
-                })]
-              })]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "space-y-2",
-            children: [/*#__PURE__*/_jsx(Label, {
-              htmlFor: "status",
-              children: "Status"
-            }), /*#__PURE__*/_jsxs(Select, {
-              value: status,
-              onValueChange: v => setStatus(v),
-              children: [/*#__PURE__*/_jsx(SelectTrigger, {
-                id: "status",
-                children: /*#__PURE__*/_jsx(SelectValue, {})
-              }), /*#__PURE__*/_jsxs(SelectContent, {
-                children: [/*#__PURE__*/_jsx(SelectItem, {
-                  value: "todo",
-                  children: "To Do"
-                }), /*#__PURE__*/_jsx(SelectItem, {
-                  value: "in-progress",
-                  children: "In Progress"
-                }), /*#__PURE__*/_jsx(SelectItem, {
-                  value: "completed",
-                  children: "Completed"
-                })]
-              })]
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "space-y-2",
-          children: [/*#__PURE__*/_jsx(Label, {
-            children: "Due Date"
-          }), /*#__PURE__*/_jsxs(Popover, {
-            children: [/*#__PURE__*/_jsx(PopoverTrigger, {
-              asChild: true,
-              children: /*#__PURE__*/_jsxs(Button, {
-                variant: "outline",
-                className: "w-full justify-start text-left font-normal",
-                children: [/*#__PURE__*/_jsx(CalendarIcon, {
-                  className: "mr-2 h-4 w-4"
-                }), dueDate ? format(dueDate, "PPP") : /*#__PURE__*/_jsx("span", {
-                  children: "Pick a date"
-                })]
-              })
-            }), /*#__PURE__*/_jsx(PopoverContent, {
-              className: "w-auto p-0",
-              children: /*#__PURE__*/_jsx(Calendar, {
-                mode: "single",
-                selected: dueDate,
-                onSelect: setDueDate,
-                initialFocus: true,
-                disabled: date => date < new Date(new Date().setHours(0, 0, 0, 0))
-              })
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "space-y-2",
-          children: [/*#__PURE__*/_jsx(Label, {
-            htmlFor: "tags",
-            children: "Tags"
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "flex gap-2",
-            children: [/*#__PURE__*/_jsx(Input, {
-              id: "tags",
-              value: tagInput,
-              onChange: e => setTagInput(e.target.value),
-              onKeyDown: e => e.key === "Enter" && (e.preventDefault(), handleAddTag()),
-              placeholder: "Add tags"
-            }), /*#__PURE__*/_jsx(Button, {
-              type: "button",
-              variant: "secondary",
-              onClick: handleAddTag,
-              children: /*#__PURE__*/_jsx(Tag, {
-                className: "w-4 h-4"
-              })
-            })]
-          }), tags.length > 0 && /*#__PURE__*/_jsx("div", {
-            className: "flex flex-wrap gap-2 mt-2",
-            children: tags.map(tag => /*#__PURE__*/_jsxs(Badge, {
-              variant: "secondary",
-              className: "cursor-pointer",
-              onClick: () => handleRemoveTag(tag),
-              children: [tag, " \xD7"]
-            }, tag))
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs(DialogFooter, {
-        children: [/*#__PURE__*/_jsx(Button, {
-          variant: "outline",
-          onClick: () => onOpenChange(false),
-          children: "Cancel"
-        }), /*#__PURE__*/_jsxs(Button, {
-          onClick: handleSave,
-          disabled: !title.trim(),
-          children: [task ? "Update" : "Create", " Task"]
-        })]
-      })]
-    })
-  });
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{task ? "Edit Task" : "Create New Task"}</DialogTitle>
+          <DialogDescription>
+            {task ? "Update task details" : "Add a new task to your workflow"}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter task title"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add task description"
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Select value={category} onValueChange={(v) => setCategory(v)}>
+              <SelectTrigger id="category">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">Personal</SelectItem>
+                <SelectItem value="work">Work</SelectItem>
+                <SelectItem value="health">Health</SelectItem>
+                <SelectItem value="shopping">Shopping</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={priority} onValueChange={(v) => setPriority(v)}>
+                <SelectTrigger id="priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v)}>
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo">To Do</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Due Date & Time</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dueDate ? format(dueDate, "MMM dd") : <span>Date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dueDate}
+                    onSelect={setDueDate}
+                    initialFocus
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Input
+                type="time"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                id="tags"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+                placeholder="Add tags"
+              />
+              <Button type="button" variant="secondary" onClick={handleAddTag}>
+                <Tag className="w-4 h-4" />
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => handleRemoveTag(tag)}
+                  >
+                    {tag} ×
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={!title.trim()}>
+            {task ? "Update" : "Create"} Task
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

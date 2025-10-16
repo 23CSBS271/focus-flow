@@ -16,7 +16,7 @@ export async function GET(request) {
       });
     }
     const tasks = await Task.find({
-      userId
+      userId: userId
     }).sort({
       createdAt: -1
     });

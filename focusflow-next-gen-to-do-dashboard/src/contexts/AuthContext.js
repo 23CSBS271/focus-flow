@@ -17,7 +17,7 @@ export function AuthProvider({
     // If NextAuth session exists, use it to set user
     if (status === 'authenticated' && session?.user) {
       const nextAuthUser = {
-        id: session.user.id || '',
+        id: session.user.id || session.user.sub || '',
         name: session.user.name || '',
         email: session.user.email || '',
         profileImage: session.user.image || ''
@@ -74,14 +74,33 @@ export function AuthProvider({
             ...data.user,
             ...profileData.user
           };
+          // Preserve selected avatar from localStorage if it exists
+          const savedAvatar = localStorage.getItem("selectedAvatar");
+          if (savedAvatar) {
+            fullUser.avatar = savedAvatar;
+          }
           localStorage.setItem("focusflow-user", JSON.stringify(fullUser));
           setUser(fullUser);
         } else {
-          setUser(data.user);
+          // Preserve selected avatar from localStorage if it exists
+          const savedAvatar = localStorage.getItem("selectedAvatar");
+          const userWithAvatar = {
+            ...data.user,
+            avatar: savedAvatar || data.user.avatar
+          };
+          localStorage.setItem("focusflow-user", JSON.stringify(userWithAvatar));
+          setUser(userWithAvatar);
         }
       } catch (profileError) {
         console.error('Failed to load profile:', profileError);
-        setUser(data.user);
+        // Preserve selected avatar from localStorage if it exists
+        const savedAvatar = localStorage.getItem("selectedAvatar");
+        const userWithAvatar = {
+          ...data.user,
+          avatar: savedAvatar || data.user.avatar
+        };
+        localStorage.setItem("focusflow-user", JSON.stringify(userWithAvatar));
+        setUser(userWithAvatar);
       }
     } catch (error) {
       throw error;
@@ -112,9 +131,6 @@ export function AuthProvider({
       localStorage.setItem("focusflow-token", `jwt.token.${Date.now()}`);
       localStorage.setItem("focusflow-user", JSON.stringify(data.user));
       setUser(data.user);
-
-      // Force page reload to ensure all components load fresh data
-      window.location.reload();
     } catch (error) {
       throw error;
     } finally {
@@ -132,7 +148,16 @@ export function AuthProvider({
     localStorage.removeItem("notifications");
     localStorage.removeItem("twoFactorEnabled");
     localStorage.removeItem("password");
+    localStorage.removeItem("selectedAvatar");
+    localStorage.removeItem("focusflow-theme");
     setUser(null);
+  };
+
+  const updateUser = (updatedUserData) => {
+    const currentUser = JSON.parse(localStorage.getItem("focusflow-user") || "{}");
+    const updatedUser = { ...currentUser, ...updatedUserData };
+    localStorage.setItem("focusflow-user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
   };
   return /*#__PURE__*/_jsx(AuthContext.Provider, {
     value: {

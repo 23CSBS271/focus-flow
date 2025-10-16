@@ -1,9 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "./mongodb";
+import connectToDatabase from "./mongodb";
 export default NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
   providers: [GoogleProvider({
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET
@@ -11,12 +9,21 @@ export default NextAuth({
   callbacks: {
     async session({
       session,
-      user
+      token
     }) {
-      if (user && session.user) {
-        session.user.id = user.id;
+      if (token && session.user) {
+        session.user.id = token.sub;
       }
       return session;
+    },
+    async jwt({
+      token,
+      user
+    }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
     },
     async signIn({
       user,
@@ -31,7 +38,10 @@ export default NextAuth({
       baseUrl
     }) {
       // Redirect to dashboard after successful sign in
-      return baseUrl;
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // If url is external, redirect to dashboard
+      if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/dashboard`;
     }
   },
   pages: {
